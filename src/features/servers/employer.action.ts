@@ -1,9 +1,10 @@
 "use server";
-import { employers, users } from "@/drizzle/schema";
+import { employers, jobs, users } from "@/drizzle/schema";
 import { getCurrentUser } from "../auth/server/auth.queries";
 import { db } from "@/config/db";
 import { eq } from "drizzle-orm";
 import { EmployerProfileData, employerProfileSchema} from "../employers/employers.schema";
+
 
 
 export const updateEmployerProfileAction = async(data:EmployerProfileData) => {
@@ -63,3 +64,4 @@ export const updateEmployerProfileAction = async(data:EmployerProfileData) => {
         };
     }
 }
+
