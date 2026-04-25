@@ -28,12 +28,14 @@ const navigationItems = [
     {
     name: "Post a Job",
     icon: Plus,
-    href: base + "/jobs",
+    href: base + "/jobs/create",
     
   },
   {
     name: "My Jobs",
     icon: Briefcase,
+    href: base + "/jobs",
+
   },
 
   {
