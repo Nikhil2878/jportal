@@ -23,6 +23,7 @@ export const EmployerJobCard = ({ job, onDelete, onEdit }: JobCardProps) => {
           <h3 className="font-semibold text-lg">{job.title}</h3>
 
           <div className="flex gap-2">
+            <h1>{job.id}</h1>
             <Button
               size="icon"
               variant="ghost"

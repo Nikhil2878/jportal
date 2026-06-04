@@ -53,6 +53,7 @@ export const EmployerJobList = () => {
   };
 
   const handleEdit = async (jobId: number) => {
+    console.log("jobId hai ye wali : ",jobId)
     router.push(`/employer-dashboard/jobs/${jobId}/edit`);
   };
 
