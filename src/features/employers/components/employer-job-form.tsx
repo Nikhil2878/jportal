@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,66 +10,102 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import Tiptap from "@/components/text-editor";
-import { 
-  Award, 
-  Briefcase, 
-  Calendar, 
-  Clock, 
-  DollarSign, 
-  GraduationCap, 
-  Loader, 
-  MapPin, 
-  Tag 
+import {
+  JOB_LEVEL,
+  JOB_TYPE,
+  MIN_EDUCATION,
+  SALARY_CURRENCY,
+  SALARY_PERIOD,
+  WORK_TYPE,
+} from "@/config/constant";
+import { cn } from "@/lib/utils";
+import {
+  Award,
+  Briefcase,
+  Calendar,
+  Clock,
+  DollarSign,
+  GraduationCap,
+  Loader,
+  MapPin,
+  Tag,
 } from "lucide-react";
 import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-// Assuming JobFormData is the inferred TypeScript type from your Zod schema
+import { Button } from "@/components/ui/button";
+import Tiptap from "@/components/text-editor";
 import { JobFormData, jobSchema } from "../jobs/jobs.schema";
-import { cn } from "@/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { createJobAction } from "@/features/servers/jobs.actions";
 
-// Form Static Field Constants
-const SALARY_CURRENCY = ["USD", "EUR", "GBP", "CAD", "AUD", "JPY", "INR", "NPR"] as const;
-const JOB_TYPE = ["remote", "hybrid", "on-site"] as const;
-const WORK_TYPE = ["full-time", "part-time", "contract", "temporary", "freelance"] as const;
-const JOB_LEVEL = [
-  "internship",
-  "entry level",
-  "junior",
-  "mid level",
-  "senior level",
-  "lead",
-  "manager",
-  "director",
-  "executive",
-] as const;
-const SALARY_PERIOD = ["hourly", "monthly", "yearly"] as const;
-const MIN_EDUCATION = ["none", "high school", "undergraduate", "masters", "phd"] as const;
+import { useRouter } from "next/navigation";
+import { createJobAction, updateJobAction } from "@/features/servers/jobs.actions";
 
-const JobForm = () => {
-  // Pass JobFormData as a generic type to useForm for strict property checking
+interface JobPostFormProps {
+  initialData?: any; // The job data fetched from DB
+  isEditMode?: boolean; // Flag to tell form what to do
+}
+
+export const JobForm = ({
+  initialData,
+  isEditMode = false,
+}: JobPostFormProps) => {
   const {
     register,
-    handleSubmit,
     control,
-    formState: { errors, isSubmitting },
-  } = useForm<JobFormData>({
+    handleSubmit,
+    formState: { errors, isDirty, isSubmitting },
+  } = useForm({
     resolver: zodResolver(jobSchema),
+    defaultValues: initialData
+      ? {
+          ...initialData,
+          // FIX 1: Handle Date Format
+          expiresAt: initialData.expiresAt
+            ? new Date(initialData.expiresAt).toISOString().split("T")[0] //"2026-01-20T18:15:00.000Z"
+            : "",
+        }
+      : {
+          title: "",
+          description: "",
+
+          jobType: undefined,
+          workType: undefined,
+          jobLevel: undefined,
+
+          location: "",
+          tags: "",
+
+          minSalary: "",
+          maxSalary: "",
+          salaryCurrency: undefined,
+          salaryPeriod: undefined,
+
+          minEducation: undefined,
+          experience: "",
+          expiresAt: "",
+        },
   });
 
-  // Server action integration with Sonner toast feedback
+  const router = useRouter();
+
   const handleFormSubmit = async (data: JobFormData) => {
     try {
-      const response = await createJobAction(data);
-      if (response.status === "SUCCESS") {
-        toast.success(response.message || "Job posted successfully!");
+      let response;
+      if (isEditMode && initialData) {
+        // --- UPDATE FLOW ---
+        response = await updateJobAction(initialData.id, data);
       } else {
-        toast.error(response.message || "Failed to post job.");
+        // --- CREATE FLOW ---
+        response = await createJobAction(data);
       }
+      // const response = await createJobAction(data);
+      if (response.status === "SUCCESS") {
+        toast.success(response.message);
+        router.push("/employer-dashboard/jobs");
+        // router.refresh(); // Ensure the list page shows new data
+      } else toast.error(response.message);
     } catch (error) {
-      toast.error("An unexpected error occurred. Please try again.");
+      toast.error("Something went wrong");
     }
   };
 
@@ -78,8 +113,6 @@ const JobForm = () => {
     <Card className="w-full max-w-4xl mx-auto">
       <CardContent>
         <form className="space-y-6" onSubmit={handleSubmit(handleFormSubmit)}>
-          
-          {/* 1. Job Title Field */}
           <div className="space-y-2">
             <Label htmlFor="title">Job Title *</Label>
             <div className="relative">
@@ -94,13 +127,14 @@ const JobForm = () => {
               />
             </div>
             {errors.title && (
-              <p className="text-sm text-destructive">{errors.title.message as string}</p>
+              <p className="text-sm text-destructive">
+                {errors.title.message as string}
+              </p>
             )}
           </div>
 
-          {/* 2. Metadata Dropdowns Row (Job Type, Work Type, Job Level) */}
+          {/* Job Type, Work Type, Job Level */}
           <div className="grid gap-6 md:grid-cols-3">
-            {/* Job Type Controlled Dropdown */}
             <div className="space-y-2">
               <Label htmlFor="jobType">Job Type *</Label>
               <Controller
@@ -112,7 +146,10 @@ const JobForm = () => {
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger
                         id="jobType"
-                        className={cn("pl-10 w-full", errors.jobType && "border-destructive")}
+                        className={cn(
+                          "pl-10 w-full",
+                          errors.jobType && "border-destructive",
+                        )}
                       >
                         <SelectValue placeholder="Select job type" />
                       </SelectTrigger>
@@ -128,11 +165,12 @@ const JobForm = () => {
                 )}
               />
               {errors.jobType && (
-                <p className="text-sm text-destructive">{errors.jobType.message as string}</p>
+                <p className="text-sm text-destructive">
+                  {errors.jobType.message as string}
+                </p>
               )}
             </div>
 
-            {/* Work Type Controlled Dropdown */}
             <div className="space-y-2">
               <Label htmlFor="workType">Work Type *</Label>
               <Controller
@@ -144,7 +182,10 @@ const JobForm = () => {
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger
                         id="workType"
-                        className={cn("pl-10 w-full", errors.workType && "border-destructive")}
+                        className={cn(
+                          "pl-10 w-full",
+                          errors.workType && "border-destructive",
+                        )}
                       >
                         <SelectValue placeholder="Select work type" />
                       </SelectTrigger>
@@ -160,11 +201,12 @@ const JobForm = () => {
                 )}
               />
               {errors.workType && (
-                <p className="text-sm text-destructive">{errors.workType.message as string}</p>
+                <p className="text-sm text-destructive">
+                  {errors.workType.message as string}
+                </p>
               )}
             </div>
 
-            {/* Job Level Controlled Dropdown */}
             <div className="space-y-2">
               <Label htmlFor="jobLevel">Job Level *</Label>
               <Controller
@@ -176,7 +218,10 @@ const JobForm = () => {
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger
                         id="jobLevel"
-                        className={cn("pl-10 w-full", errors.jobLevel && "border-destructive")}
+                        className={cn(
+                          "pl-10 w-full",
+                          errors.jobLevel && "border-destructive",
+                        )}
                       >
                         <SelectValue placeholder="Select job level" />
                       </SelectTrigger>
@@ -192,12 +237,14 @@ const JobForm = () => {
                 )}
               />
               {errors.jobLevel && (
-                <p className="text-sm text-destructive">{errors.jobLevel.message as string}</p>
+                <p className="text-sm text-destructive">
+                  {errors.jobLevel.message as string}
+                </p>
               )}
             </div>
           </div>
 
-          {/* 3. Location and Tags Row */}
+          {/* Location and Tags */}
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="location">Location (Optional)</Label>
@@ -207,13 +254,18 @@ const JobForm = () => {
                   id="location"
                   type="text"
                   placeholder="e.g., New York, NY or Remote"
-                  className={cn("pl-10", errors.location && "border-destructive")}
+                  className={cn(
+                    "pl-10",
+                    errors.location && "border-destructive",
+                  )}
                   {...register("location")}
                   aria-invalid={!!errors.location}
                 />
               </div>
               {errors.location && (
-                <p className="text-sm text-destructive">{errors.location.message as string}</p>
+                <p className="text-sm text-destructive">
+                  {errors.location.message as string}
+                </p>
               )}
             </div>
 
@@ -231,12 +283,14 @@ const JobForm = () => {
                 />
               </div>
               {errors.tags && (
-                <p className="text-sm text-destructive">{errors.tags.message as string}</p>
+                <p className="text-sm text-destructive">
+                  {errors.tags.message as string}
+                </p>
               )}
             </div>
           </div>
 
-          {/* 4. Salary Information Complex Layout Grid */}
+          {/* Salary Information */}
           <div className="grid gap-6 md:grid-cols-4">
             <div className="space-y-2">
               <Label htmlFor="minSalary">Min Salary (Optional)</Label>
@@ -247,13 +301,18 @@ const JobForm = () => {
                   type="text"
                   inputMode="numeric"
                   placeholder="e.g., 50000"
-                  className={cn("pl-10", errors.minSalary && "border-destructive")}
+                  className={cn(
+                    "pl-10",
+                    errors.minSalary && "border-destructive",
+                  )}
                   {...register("minSalary")}
                   aria-invalid={!!errors.minSalary}
                 />
               </div>
               {errors.minSalary && (
-                <p className="text-sm text-destructive">{errors.minSalary.message as string}</p>
+                <p className="text-sm text-destructive">
+                  {errors.minSalary.message as string}
+                </p>
               )}
             </div>
 
@@ -266,17 +325,21 @@ const JobForm = () => {
                   type="text"
                   inputMode="numeric"
                   placeholder="e.g., 80000"
-                  className={cn("pl-10", errors.maxSalary && "border-destructive")}
+                  className={cn(
+                    "pl-10",
+                    errors.maxSalary && "border-destructive",
+                  )}
                   {...register("maxSalary")}
                   aria-invalid={!!errors.maxSalary}
                 />
               </div>
               {errors.maxSalary && (
-                <p className="text-sm text-destructive">{errors.maxSalary.message as string}</p>
+                <p className="text-sm text-destructive">
+                  {errors.maxSalary.message as string}
+                </p>
               )}
             </div>
 
-            {/* Currency Select Controlled Dynamic Data Field */}
             <div className="space-y-2">
               <Label htmlFor="salaryCurrency">Currency</Label>
               <Controller
@@ -286,7 +349,10 @@ const JobForm = () => {
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger
                       id="salaryCurrency"
-                      className={cn("w-full", errors.salaryCurrency && "border-destructive")}
+                      className={cn(
+                        "w-full",
+                        errors.salaryCurrency && "border-destructive",
+                      )}
                     >
                       <SelectValue placeholder="Currency" />
                     </SelectTrigger>
@@ -301,11 +367,12 @@ const JobForm = () => {
                 )}
               />
               {errors.salaryCurrency && (
-                <p className="text-sm text-destructive">{errors.salaryCurrency.message as string}</p>
+                <p className="text-sm text-destructive">
+                  {errors.salaryCurrency.message as string}
+                </p>
               )}
             </div>
 
-            {/* Salary Frequency Controlled Dropdown */}
             <div className="space-y-2">
               <Label htmlFor="salaryPeriod">Period</Label>
               <Controller
@@ -315,7 +382,10 @@ const JobForm = () => {
                   <Select value={field.value} onValueChange={field.onChange}>
                     <SelectTrigger
                       id="salaryPeriod"
-                      className={cn("w-full", errors.salaryPeriod && "border-destructive")}
+                      className={cn(
+                        "w-full",
+                        errors.salaryPeriod && "border-destructive",
+                      )}
                     >
                       <SelectValue placeholder="Period" />
                     </SelectTrigger>
@@ -330,12 +400,14 @@ const JobForm = () => {
                 )}
               />
               {errors.salaryPeriod && (
-                <p className="text-sm text-destructive">{errors.salaryPeriod.message as string}</p>
+                <p className="text-sm text-destructive">
+                  {errors.salaryPeriod.message as string}
+                </p>
               )}
             </div>
           </div>
 
-          {/* 5. Education & Expiry Dates Row */}
+          {/* Education and Experience */}
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="minEducation">Minimum Education (Optional)</Label>
@@ -348,7 +420,10 @@ const JobForm = () => {
                     <Select value={field.value} onValueChange={field.onChange}>
                       <SelectTrigger
                         id="minEducation"
-                        className={cn("pl-10 w-full", errors.minEducation && "border-destructive")}
+                        className={cn(
+                          "pl-10 w-full",
+                          errors.minEducation && "border-destructive",
+                        )}
                       >
                         <SelectValue placeholder="Select education level" />
                       </SelectTrigger>
@@ -364,7 +439,9 @@ const JobForm = () => {
                 )}
               />
               {errors.minEducation && (
-                <p className="text-sm text-destructive">{errors.minEducation.message as string}</p>
+                <p className="text-sm text-destructive">
+                  {errors.minEducation.message as string}
+                </p>
               )}
             </div>
 
@@ -375,37 +452,48 @@ const JobForm = () => {
                 <Input
                   id="expiresAt"
                   type="date"
-                  className={cn("pl-10", errors.expiresAt && "border-destructive")}
+                  className={cn(
+                    "pl-10",
+                    errors.expiresAt && "border-destructive",
+                  )}
                   {...register("expiresAt")}
                   aria-invalid={!!errors.expiresAt}
                 />
               </div>
               {errors.expiresAt && (
-                <p className="text-sm text-destructive">{errors.expiresAt.message as string}</p>
+                <p className="text-sm text-destructive">
+                  {errors.expiresAt.message as string}
+                </p>
               )}
             </div>
           </div>
 
-          {/* 6. Experience Text Field */}
+          {/* Experience */}
           <div className="space-y-2">
-            <Label htmlFor="experience">Experience Requirements (Optional)</Label>
+            <Label htmlFor="experience">
+              Experience Requirements (Optional)
+            </Label>
             <div className="relative">
               <Award className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
               <Input
                 id="experience"
                 type="text"
                 placeholder="e.g., 3+ years of React development"
-                className={cn("pl-10", errors.experience && "border-destructive")}
+                className={cn(
+                  "pl-10",
+                  errors.experience && "border-destructive",
+                )}
                 {...register("experience")}
                 aria-invalid={!!errors.experience}
               />
             </div>
             {errors.experience && (
-              <p className="text-sm text-destructive">{errors.experience.message as string}</p>
+              <p className="text-sm text-destructive">
+                {errors.experience.message as string}
+              </p>
             )}
           </div>
 
-          {/* 7. Rich Text Component Editor (Tiptap Custom Wrapper) */}
           <Controller
             name="description"
             control={control}
@@ -415,29 +503,40 @@ const JobForm = () => {
                 <Tiptap
                   content={field.value}
                   onChange={(value) => field.onChange(value)}
+                  // toolbarClassName="top-16"
                 />
                 {fieldState.error && (
-                  <p className="text-sm text-destructive">{fieldState.error.message}</p>
+                  <p className="text-sm text-destructive">
+                    {fieldState.error.message}
+                  </p>
                 )}
               </div>
             )}
           />
 
-          {/* 8. Responsive Dynamic Form Submitting Actions Trigger Block */}
           <div className="flex items-center gap-4 pt-4 flex-wrap">
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="w-full md:w-auto flex items-center justify-center gap-2"
+              className="w-full md:w-auto"
             >
               {isSubmitting && <Loader className="w-4 h-4 animate-spin" />}
-              {isSubmitting ? "Posting Job..." : "Post Job"}
+              {isEditMode
+                ? isSubmitting
+                  ? "Saving..."
+                  : "Update Job"
+                : isSubmitting
+                  ? "Saving..."
+                  : "Post Job"}
             </Button>
+            {!isDirty && (
+              <p className="text-sm text-muted-foreground">
+                No changes to save
+              </p>
+            )}
           </div>
         </form>
       </CardContent>
     </Card>
   );
 };
-
-export default JobForm;

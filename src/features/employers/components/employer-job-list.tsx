@@ -37,7 +37,6 @@ export const EmployerJobList = () => {
 
     fetchJobs();
   }, []);
-
   const handleDelete = async (jobId: number) => {
     try {
       const res = await deleteJobAction(jobId);
