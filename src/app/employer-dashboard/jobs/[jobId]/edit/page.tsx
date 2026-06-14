@@ -26,9 +26,9 @@ export const EditJobPage = async ({ params }: EditJobPageProps) => {
   // 2. 'jobId' नाम से नया const बनाएं जो number होगा
   const jobId = Number(jobIdStr); 
 
-  // if (Number.isNaN(jobId)) {
-  //   throw new Error("Invalid job ID");
-  // } ❌
+  if (Number.isNaN(jobId)) {
+    throw new Error("Invalid job ID");
+  } 
 
   // if (Number.isNaN(jobId)) redirect("/employer-dashboard/jobs");
 

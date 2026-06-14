@@ -14,7 +14,7 @@ export interface JobFilterParams {
 }
 
 export async function getAllJobs(filters: JobFilterParams) {
-  console.log("filers real: ", filters);
+  console.log("filters real: ", filters);
 
   const page = filters.page || 1;
   const limit = filters.limit || 9;
