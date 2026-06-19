@@ -8,6 +8,7 @@ import { ApplicantProfileStatus } from "@/features/applicant/components/applican
 export default async function ApplicantDashboard() {
   const user = await getCurrentUser();
   if (!user) return redirect("/login");
+  // if (user) return redirect("/dashboard");
 
   return (
     <div className="space-y-8 p-6 max-w-7xl mx-auto">
