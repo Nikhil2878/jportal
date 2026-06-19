@@ -37,7 +37,7 @@ const navigationItems = [
   {
     name: "Applied",
     icon: Briefcase,
-    href: base + "/applications",
+    href: base + "/applied-jobs",
 
   },
 

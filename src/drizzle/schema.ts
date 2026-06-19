@@ -1,29 +1,51 @@
-import { JOB_LEVEL, JOB_TYPE, MIN_EDUCATION, SALARY_CURRENCY, SALARY_PERIOD, WORK_TYPE } from '@/config/constant';
-import { relations } from 'drizzle-orm';
-import { int, mysqlTable, serial, timestamp, varchar ,text, mysqlEnum, year, date, boolean} from 'drizzle-orm/mysql-core';
+import { relations } from "drizzle-orm";
+import {
+  JOB_LEVEL,
+  JOB_TYPE,
+  MIN_EDUCATION,
+  SALARY_CURRENCY,
+  SALARY_PERIOD,
+  WORK_TYPE,
+} from "@/config/constant";
+import {
+  date,
+  int,
+  mysqlEnum,
+  mysqlTable,
+  text,
+  timestamp,
+  varchar,
+  year,
+  boolean,
+} from "drizzle-orm/mysql-core";
+
 export const users = mysqlTable("users", {
-    id: int("id").autoincrement().primaryKey(),
-    name: varchar("name",{length: 255}).notNull(),
-    userName: varchar("username",{length:255}).unique().notNull(),
-    password: text("password").notNull(),
-    email: varchar("email",{length: 255}).notNull().unique(),
-    role: mysqlEnum("role",["admin","applicant","employer"]).default("applicant"),
-    phoneNumber: varchar("phone_number",{length: 255}),
-    avatarUrl: text("avatar_url"),
-    deletedAt: timestamp("deleted_at"),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull()
+  id: int("id").autoincrement().primaryKey(),
+  name: varchar("name", { length: 255 }).notNull(),
+  userName: varchar("username", { length: 255 }).unique().notNull(),
+  password: text("password").notNull(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  role: mysqlEnum("role", ["admin", "applicant", "employer"])
+    .default("applicant")
+    .notNull(),
+  phoneNumber: varchar("phone_number", { length: 255 }),
+  avatarUrl: text("avatar_url"),
+  deletedAt: timestamp("deleted_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });
 
-export const sessions = mysqlTable("sessions",{
-    id:varchar("id",{length:255}).primaryKey(),
-    userId:int("user_id").notNull().references(() => users.id,{onDelete: 'cascade'}),
-    userAgent: text('user_agent').notNull(),
-    ip: varchar("ip",{length: 255}).notNull(),
-    expiresAt: timestamp("expires_at").notNull(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull()
-})
+export const sessions = mysqlTable("sessions", {
+  id: varchar("id", { length: 255 }).primaryKey(),
+  userId: int("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  userAgent: text("user_agent").notNull(),
+  ip: varchar("ip", { length: 255 }).notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
+});
 
 export const employers = mysqlTable("employers", {
   id: int("id")
@@ -55,7 +77,7 @@ export const applicants = mysqlTable("applicants", {
   maritalStatus: mysqlEnum("marital_status", ["single", "married", "divorced"]),
 
   gender: mysqlEnum("gender", ["male", "female", "other"]),
- 
+
   education: mysqlEnum("education", [
     "none",
     "high school",
@@ -71,32 +93,6 @@ export const applicants = mysqlTable("applicants", {
   createdAt: timestamp("created_at", { mode: "string" }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { mode: "string" }).defaultNow().notNull(),
 });
-
-
-// Relations definitions (users table(main table) ka employer,applicant and sessions ke saath kya r hai)
-export const usersRelations = relations(users, ({ one, many }) => ({
-  // One user can have one employer profile (if role is employer)
-  employer: one(employers, {
-    fields: [users.id],
-    references: [employers.id],
-  }),
-  // One user can have one applicant profile (if role is applicant)
-  applicant: one(applicants, {
-    fields: [users.id],
-    references: [applicants.id],
-  }),
-  // One user can have many sessions
-  sessions: many(sessions),
-}));
-
-export const sessionsRelations = relations(sessions, ({ one }) => ({
-  // Each session belongs to one user
-  user: one(users, {
-    fields: [sessions.userId],
-    references: [users.id],
-  }),
-}));
-
 
 export const jobs = mysqlTable("jobs", {
   id: int("id").autoincrement().primaryKey(),
@@ -123,21 +119,6 @@ export const jobs = mysqlTable("jobs", {
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });
 
-export const jobsRelations = relations(jobs, ({ one }) => ({
-  // Each job belongs to one employer
-  employer: one(employers, {
-    fields: [jobs.employerId],
-    references: [employers.id],
-  }),
-}));
-
-// relations(TABLE_NAME, (helpers) => ({
-//   relationName: relationType(OTHER_TABLE, {
-//     fields: [CURRENT_TABLE.column],
-//     references: [OTHER_TABLE.column],
-//   }),
-// }));
-
 export const resumes = mysqlTable("resumes", {
   id: int("id").autoincrement().primaryKey(),
   applicantId: int("applicant_id")
@@ -154,7 +135,45 @@ export const resumes = mysqlTable("resumes", {
   updatedAt: timestamp("updated_at").defaultNow().onUpdateNow().notNull(),
 });
 
+export const jobApplications = mysqlTable("job_applications", {
+  id: int("id").autoincrement().primaryKey(),
 
+  jobId: int("job_id")
+    .notNull()
+    .references(() => jobs.id, { onDelete: "cascade" }),
+
+  applicantId: int("applicant_id")
+    .notNull()
+    .references(() => applicants.id, { onDelete: "cascade" }),
+
+  resumeId: int("resume_id")
+    .notNull()
+    .references(() => resumes.id, { onDelete: "restrict" }), // They can't delete a resume if it's used in an application
+
+  coverLetter: text("cover_letter"),
+
+  // You can add a status enum later if you want employers to "accept/reject"
+  // status: mysqlEnum("status", ["pending", "reviewed", "rejected"]).default("pending"),
+  appliedAt: timestamp("applied_at").defaultNow().notNull(),
+});
+
+export const jobApplicationsRelations = relations(
+  jobApplications,
+  ({ one }) => ({
+    job: one(jobs, {
+      fields: [jobApplications.jobId],
+      references: [jobs.id],
+    }),
+    applicant: one(applicants, {
+      fields: [jobApplications.applicantId],
+      references: [applicants.id],
+    }),
+    resume: one(resumes, {
+      fields: [jobApplications.resumeId],
+      references: [resumes.id],
+    }),
+  }),
+);
 
 export const resumesRelations = relations(resumes, ({ one }) => ({
   applicant: one(applicants, {
@@ -167,4 +186,41 @@ export const applicantsRelations = relations(applicants, ({ many }) => ({
   resumes: many(resumes),
 }));
 
+export const jobsRelations = relations(jobs, ({ one }) => ({
+  // Each job belongs to one employer
+  employer: one(employers, {
+    fields: [jobs.employerId],
+    references: [employers.id],
+  }),
+}));
 
+// relations(TABLE_NAME, (helpers) => ({
+//   relationName: relationType(OTHER_TABLE, {
+//     fields: [CURRENT_TABLE.column],
+//     references: [OTHER_TABLE.column],
+//   }),
+// }));
+
+// Relations definitions
+export const usersRelations = relations(users, ({ one, many }) => ({
+  // One user can have one employer profile (if role is employer)
+  employer: one(employers, {
+    fields: [users.id],
+    references: [employers.id],
+  }),
+  // One user can have one applicant profile (if role is applicant)
+  applicant: one(applicants, {
+    fields: [users.id],
+    references: [applicants.id],
+  }),
+  // One user can have many sessions
+  sessions: many(sessions),
+}));
+
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+  // Each session belongs to one user
+  user: one(users, {
+    fields: [sessions.userId],
+    references: [users.id],
+  }),
+}));
