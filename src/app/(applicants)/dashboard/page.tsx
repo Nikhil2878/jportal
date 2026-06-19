@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/features/auth/server/auth.queries";
 import { ApplicantStats } from "@/features/applicant/components/applicant-stats";
-import { ApplicantProfileStatus } from "@/features/applicant/components/applicant-profile-status";
+// import { ApplicantProfileStatus } from "@/features/applicant/components/applicant-profile-status";
 // import { RecentApplications } from "@/features/applicant/components/recent-applications";
 
 
@@ -23,7 +23,7 @@ export default async function ApplicantDashboard() {
 
       <ApplicantStats />
 
-      <ApplicantProfileStatus />
+      {/* <ApplicantProfileStatus /> */}
 
       {/* <RecentApplications /> */}
     </div>
