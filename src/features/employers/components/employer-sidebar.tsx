@@ -24,7 +24,11 @@ const navigationItems = [
     icon: LayoutDashboard,
     href: base,
   },
-
+  {
+    name: "Applications",
+    icon: User, 
+    href: base + "/applications",
+  },
     {
     name: "Post a Job",
     icon: Plus,
@@ -38,10 +42,7 @@ const navigationItems = [
 
   },
 
-  {
-    name: "Saved Candidate",
-    icon: Bookmark,
-  },
+
   {
     name: "Settings",
     icon: Settings,
