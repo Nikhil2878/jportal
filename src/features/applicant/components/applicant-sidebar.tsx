@@ -30,7 +30,7 @@ const navigationItems = [
     name: "Find Jobs",
     icon: Search,
     // href: base + "/find-jobs",
-    href: base + "/jobs",
+    href: "/jobs",
 
     
   },

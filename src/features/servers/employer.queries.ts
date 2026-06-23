@@ -46,8 +46,8 @@ export async function getEmployerApplications(employerId: number) {
       resume: resumes,
     })
     .from(jobApplications)
-    .innerJoin(jobs, eq(jobApplications.jobId, jobs.id))
-    .innerJoin(users, eq(jobApplications.applicantId, users.id))
+    .innerJoin(jobs, eq(jobApplications.jobId, jobs.id))//job's details
+    .innerJoin(users, eq(jobApplications.applicantId, users.id))//user's details
     .leftJoin(applicants, eq(jobApplications.applicantId, applicants.id))
     .leftJoin(resumes, eq(jobApplications.resumeId, resumes.id))
     .where(eq(jobs.employerId, employerId))
