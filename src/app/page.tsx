@@ -11,6 +11,7 @@ import { jobs, employers } from "@/drizzle/schema";
 import { desc, eq } from "drizzle-orm";
 import { formatDistanceToNow } from "date-fns";
 
+//This is comment for explaining
 async function getFeaturedJobs() {
   return await db
     .select({ job: jobs, employer: employers })
