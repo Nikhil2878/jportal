@@ -203,8 +203,11 @@ export default async function HomePage() {
           <div className="flex items-center gap-2 font-bold text-xl text-white">
             <Briefcase className="w-6 h-6 text-cyan-400" /> YeJobs
           </div>
-          <p className="text-sm">© {new Date().getFullYear()} YeJobs.</p>
+          {/* <p className="text-sm">© {new Date().getFullYear()} YeJobs.</p> */}
         </div>
+        <div className="relative z-10 border-t border-white/10 text-center py-5 text-gray-500 text-sm">
+        © {new Date().getFullYear()} YeJobs  (Website Developed By Nikhil Rawat). All rights reserved.
+      </div>
       </footer>
     </div>
   );
