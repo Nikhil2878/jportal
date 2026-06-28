@@ -14,20 +14,15 @@ export default async function RootLayout({
 
   if (user.role !== "applicant") return redirect("/employer-dashboard");
 
+  return (
+    <div className="flex min-h-screen bg-slate-50">
+      {/* Sidebar renders desktop rail + mobile bottom nav internally */}
+      <ApplicantSidebar />
 
-  return(
-
-  <div className="flex">
-  {/* Sidebar (hidden on mobile) */}
-  <div className="hidden md:block">
-    <ApplicantSidebar />
-  </div>
-
-  {/* Main Content */}
-  <div className="flex-1 p-6 bg-blue-50 min-h-screen">
-    {children}
-  </div>
-</div>
-  )
+      {/* Main Content */}
+      <div className="flex-1 min-h-screen w-full p-4 pb-24 sm:p-6 md:pb-6 bg-slate-50">
+        {children}
+      </div>
+    </div>
+  );
 }
-
