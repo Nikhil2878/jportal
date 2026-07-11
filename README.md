@@ -1,36 +1,107 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+💼 Job Portal – Full Stack Web Application
 
-## Getting Started
+A modern, scalable, and production-ready Job Portal built with Next.js, TypeScript, Shadcn UI, MySQL, and Drizzle ORM. The platform connects Job Seekers with Employers through a secure, responsive, and intuitive interface.
 
-First, run the development server:
+🚀 Features
+🔐 Authentication & Authorization
+Secure user authentication
+Role-based access control
+👨‍💼 Admin
+🏢 Employer
+👨‍💻 Job Seeker
+Protected routes
+Permission-based dashboard access
+📝 Job Management
+Employer
+Create job postings
+Edit existing jobs
+Delete job listings
+Manage all posted jobs
+Job Seeker
+Browse available jobs
+Search jobs by keyword
+Filter jobs
+Apply for jobs
+View applied jobs
+✅ Form Validation
+Client-side validation using Zod
+Server-side validation
+Type-safe data handling
+Improved user experience with meaningful validation messages
+🎨 Modern UI
+Responsive design
+Mobile-first approach
+Accessible components
+Built with Shadcn UI
+Styled using Tailwind CSS
+🗄️ Database
+MySQL database
+Type-safe queries using Drizzle ORM
+Well-structured database schema
+Efficient relational data management
+⚡ Performance
+Next.js App Router
+Server Components
+Optimized API Routes / Server Actions
+SEO-friendly architecture
+Fast page loading
+Scalable project structure
+🛠️ Tech Stack
+Frontend
+Next.js
+TypeScript
+Tailwind CSS
+Shadcn UI
+Backend
+Next.js API Routes
+Server Actions
+Database
+MySQL
+Drizzle ORM
+Validation
+Zod
+Authentication
+Secure Authentication
+Role-Based Authorization
+📂 Project Structure
+job-portal/
+│
+├── app/
+├── components/
+├── actions/
+├── lib/
+├── db/
+├── schemas/
+├── hooks/
+├── public/
+├── types/
+├── middleware.ts
+├── drizzle.config.ts
+├── package.json
+└── README.md
+👥 User Roles
+👨‍💼 Admin
+Manage platform
+Manage users
+Manage employers
+Manage job listings
+🏢 Employer
+Post jobs
+Update jobs
+Delete jobs
+View applicants
+👨‍💻 Job Seeker
+Search jobs
+Filter jobs
+Apply for jobs
+Manage applications
+🗃️ Database Schema
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+The application includes the following core entities:
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Users
+Employer Profiles
+Jobs
+Applications
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Relationships are designed using Drizzle ORM with type-safe queries.
